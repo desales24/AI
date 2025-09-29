@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prediksi Pertandingan</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        form { margin-bottom: 20px; }
+        input, button { padding: 8px; margin: 5px; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <h2>⚽ Prediksi Pertandingan</h2>
+    <form method="POST">
+        <label>Team:</label>
+        <input type="text" name="team" required>
+        <label>Opponent:</label>
+        <input type="text" name="opponent" required>
+        <button type="submit">Prediksi</button>
+    </form>
+
+    {% if hasil %}
+    <div class="result">
+        <h3>Hasil Prediksi</h3>
+        <p><strong>{{ team }}</strong> vs <strong>{{ opponent }}</strong></p>
+        <p>👉 Prediksi: <b>{{ hasil }}</b></p>
+        <p>Probabilitas:</p>
+        <ul>
+            {% for k, v in prob_dict.items() %}
+                <li>{{ k }} : {{ v }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</body>
+</html>
