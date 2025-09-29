@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Sepakbola</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, button { padding: 10px; margin: 5px; }
+        table { border-collapse: collapse; width: 50%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        .prediction { margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Prediksi Hasil Pertandingan Sepakbola</h1>
+    <form method="POST">
+        <input type="text" name="home_team" placeholder="Nama Klub Home" required>
+        <input type="text" name="away_team" placeholder="Nama Klub Away" required>
+        <button type="submit">Prediksi</button>
+    </form>
+
+    {% if result %}
+        {% if result.error %}
+            <p style="color:red">{{ result.error }}</p>
+        {% else %}
+            <h2>Statistik Klub</h2>
+            <table>
+                <tr>
+                    <th>Tim</th>
+                    <th>Rata-rata Gol</th>
+                    <th>Rata-rata Kebobolan</th>
+                    <th>Persentase Menang</th>
+                </tr>
+                <tr>
+                    <td>{{ result.home_name }} (Home)</td>
+                    <td>{{ result.stats.home.avg_gf }}</td>
+                    <td>{{ result.stats.home.avg_ga }}</td>
+                    <td>{{ result.stats.home.win_pct }}%</td>
+                </tr>
+                <tr>
+                    <td>{{ result.away_name }} (Away)</td>
+                    <td>{{ result.stats.away.avg_gf }}</td>
+                    <td>{{ result.stats.away.avg_ga }}</td>
+                    <td>{{ result.stats.away.win_pct }}%</td>
+                </tr>
+            </table>
+
+            <div class="prediction">
+                📊 Prediksi: {{ result.home_name }} vs {{ result.away_name }} → 
+                {{ result.prediction.result }} (confidence: {{ result.prediction.confidence }})
+            </div>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
