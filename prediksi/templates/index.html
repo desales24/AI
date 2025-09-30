@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Sepak Bola AI</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0; 
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; 
+            margin: 20px auto; 
+            background: #fff; 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h2 { 
+            text-align: center; 
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        label { 
+            display: block; 
+            margin-top: 15px; 
+            font-weight: bold;
+            color: #4a5568;
+        }
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+        .search-input {
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 5px; 
+            border-radius: 8px; 
+            border: 2px solid #e2e8f0; 
+            box-sizing: border-box;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .search-input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+        .suggestion-item {
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .suggestion-item:hover {
+            background: #f7fafc;
+        }
+        .suggestion-item.selected {
+            background: #667eea;
+            color: white;
+        }
+        button { 
+            margin-top: 25px; 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .result { 
+            margin-top: 30px; 
+            padding: 25px; 
+            background: #f7fafc; 
+            border: 2px solid #e2e8f0; 
+            border-radius: 12px; 
+        }
+        .match-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+        .score-prediction {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .win-probability {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .probability-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border: 3px solid #e2e8f0;
+        }
+        .team-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        .probability-value {
+            font-size: 42px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            background: #e2e8f0;
+            border-radius: 15px;
+            margin: 20px 0;
+            overflow: hidden;
+            height: 35px;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            text-align: center;
+            color: white;
+            line-height: 35px;
+            font-weight: bold;
+            transition: width 0.8s ease-in-out;
+            font-size: 16px;
+        }
+        .total-check {
+            text-align: center;
+            font-size: 16px;
+            color: #718096;
+            margin-top: 15px;
+            padding: 8px;
+            background: #f7fafc;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .top-scores {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .score-item {
+            background: #4299e1;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .stats-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #e2e8f0;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .stat-box {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+            margin: 5px 0;
+        }
+        .stat-label {
+            color: #718096;
+            font-size: 14px;
+        }
+        .error-message {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #feb2b2;
+            text-align: center;
+            margin-top: 20px;
+        }
+        .team1-prob { 
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+        .team2-prob { 
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+        }
+        .goals-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .info-note {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #e6fffa;
+            border-radius: 8px;
+            border: 2px solid #81e6d9;
+            font-size: 14px;
+        }
+        .expected-goals {
+            background: #fffaf0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px solid #faf089;
+        }
+        .probability-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .team-count {
+            font-size: 14px;
+            color: #718096;
+            margin-top: 5px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>⚽ Prediksi Sepak Bola AI</h2>
+        <form method="POST" id="predictionForm">
+            <label for="tim1">🏠 Klub Home:</label>
+            <div class="search-container">
+                <input type="text" id="tim1" name="tim1" required 
+                       class="search-input" 
+                       placeholder="Ketik atau pilih klub home..."
+                       autocomplete="off">
+                <div class="suggestions" id="suggestions1"></div>
+            </div>
+            <div class="team-count">{{ teams|length }} tim tersedia</div>
+
+            <label for="tim2">✈️ Klub Away:</label>
+            <div class="search-container">
+                <input type="text" id="tim2" name="tim2" required 
+                       class="search-input" 
+                       placeholder="Ketik atau pilih klub away..."
+                       autocomplete="off">
+                <div class="suggestions" id="suggestions2"></div>
+            </div>
+            <div class="team-count">{{ teams|length }} tim tersedia</div>
+
+            <button type="submit">🎯 Prediksi Pertandingan</button>
+        </form>
+
+        {% if hasil %}
+        <div class="result">
+            <!-- Header Pertandingan -->
+            <div class="match-header">
+                <span class="team-name">{{ hasil.tim1 }}</span> 🆚 <span class="team-name">{{ hasil.tim2 }}</span>
+            </div>
+
+            <!-- Prediksi Skor Utama -->
+            <div class="score-prediction">
+                🥇 Prediksi Skor Teratas:<br>
+                <div style="font-size: 32px; margin: 10px 0;">
+                    {{ hasil.predicted_score[0] }} - {{ hasil.predicted_score[1] }}
+                </div>
+                <div style="font-size: 16px; opacity: 0.9;">
+                    Probabilitas: {{ hasil.score_probability }}%
+                </div>
+            </div>
+
+            <!-- Expected Goals -->
+            <div class="expected-goals">
+                <h4>🎯 Expected Goals (xG)</h4>
+                <div class="goals-stats">
+                    <div class="stat-box">
+                        <div class="team-name">{{ hasil.tim1 }}</div>
+                        <div class="stat-value">{{ hasil.home_expected }}</div>
+                        <div class="stat-label">Expected Goals</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="team-name">{{ hasil.tim2 }}</div>
+                        <div class="stat-value">{{ hasil.away_expected }}</div>
+                        <div class="stat-label">Expected Goals</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Peluang Menang Masing-masing Tim -->
+            <h4>🏆 Peluang Menang Masing-masing Tim</h4>
+            <div class="probability-label">
+                *Probabilitas dihitung berdasarkan analisis Machine Learning dengan mempertimbangkan form terkini dan statistik head-to-head
+            </div>
+            <div class="win-probability">
+                <div class="probability-card">
+                    <div class="team-name">{{ hasil.tim1 }}</div>
+                    <div class="probability-value">{{ hasil.win_prob1 }}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill team1-prob" style="width: {{ hasil.win_prob1 }}%">{{ hasil.win_prob1 }}%</div>
+                    </div>
+                    <div class="probability-label">
+                        Home advantage + form terkini + statistik head-to-head
+                    </div>
+                </div>
+                <div class="probability-card">
+                    <div class="team-name">{{ hasil.tim2 }}</div>
+                    <div class="probability-value">{{ hasil.win_prob2 }}%</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill team2-prob" style="width: {{ hasil.win_prob2 }}%">{{ hasil.win_prob2 }}%</div>
+                    </div>
+                    <div class="probability-label">
+                        Performa away + form terkini + statistik head-to-head
+                    </div>
+                </div>
+            </div>
+            <div class="total-check">
+                Total Probabilitas: {{ "%.1f"|format(hasil.win_prob1 + hasil.win_prob2) }}%
+            </div>
+
+            <!-- Skor Lain yang Mungkin -->
+            <h4>🎯 Skor Lain yang Mungkin</h4>
+            <div class="top-scores">
+                {% for score, prob in hasil.top_scores %}
+                <div class="score-item">
+                    {{ score[0] }} - {{ score[1] }}<br>
+                    <div style="font-size: 14px; margin-top: 5px;">
+                        {{ "%.1f"|format(prob * 100) }}%
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Statistik Form 5 Pertandingan Terakhir -->
+            <h4>📈 Statistik 5 Pertandingan Terakhir</h4>
+            <div class="stats-grid">
+                <div class="stats-section">
+                    <div class="team-name" style="text-align: center; margin-bottom: 15px;">{{ hasil.tim1 }}</div>
+                    <div class="goals-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">{{ "%.2f"|format(hasil.home_stats.avg_gf) }}</div>
+                            <div class="stat-label">Gol/Match</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ "%.2f"|format(hasil.home_stats.avg_ga) }}</div>
+                            <div class="stat-label">Kemasukan/Match</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <div class="team-name" style="text-align: center; margin-bottom: 15px;">{{ hasil.tim2 }}</div>
+                    <div class="goals-stats">
+                        <div class="stat-box">
+                            <div class="stat-value">{{ "%.2f"|format(hasil.away_stats.avg_gf) }}</div>
+                            <div class="stat-label">Gol/Match</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value">{{ "%.2f"|format(hasil.away_stats.avg_ga) }}</div>
+                            <div class="stat-label">Kemasukan/Match</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Head-to-Head Statistics -->
+            <h4>🤝 Head-to-Head Statistics</h4>
+            <div class="stats-section">
+                <div class="goals-stats">
+                    <div class="stat-box">
+                        <div class="stat-value">{{ "%.2f"|format(hasil.h2h_stats.h2h_avg_gf) }}</div>
+                        <div class="stat-label">Gol/Match ({{ hasil.tim1 }})</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">{{ "%.2f"|format(hasil.h2h_stats.h2h_avg_ga) }}</div>
+                        <div class="stat-label">Gol/Match ({{ hasil.tim2 }})</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informasi Tambahan -->
+            <div class="info-note">
+                <strong>ℹ️ Catatan:</strong> Prediksi ini menggunakan model Machine Learning (XGBoost) dan analisis statistik Poisson berdasarkan data 5 pertandingan terakhir. 
+                Expected Goals (xG) menunjukkan kualitas peluang mencetak gol. Probabilitas menang sudah mempertimbangkan form terkini, head-to-head, dan home advantage.
+            </div>
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="error-message">
+            <strong>❌ Error:</strong> {{ error }}
+            <div style="margin-top: 10px; font-size: 14px;">
+                Pastikan nama klub ditulis dengan benar dan tersedia dalam database.
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Data tim dari backend
+        const allTeams = {{ teams|tojson }};
+        
+        // Auto-focus pada input pertama
+        document.getElementById('tim1').focus();
+        
+        // Setup search functionality untuk kedua input
+        setupSearch('tim1', 'suggestions1');
+        setupSearch('tim2', 'suggestions2');
+
+        function setupSearch(inputId, suggestionsId) {
+            const input = document.getElementById(inputId);
+            const suggestions = document.getElementById(suggestionsId);
+            let selectedIndex = -1;
+            
+            input.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                suggestions.innerHTML = '';
+                selectedIndex = -1;
+                
+                if (query.length < 2) {
+                    suggestions.style.display = 'none';
+                    return;
+                }
+                
+                // Filter teams berdasarkan query
+                const matchedTeams = allTeams.filter(team => 
+                    team.toLowerCase().includes(query)
+                ).slice(0, 8);
+                
+                if (matchedTeams.length > 0) {
+                    matchedTeams.forEach((team, index) => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        div.textContent = team;
+                        div.addEventListener('click', function() {
+                            input.value = team;
+                            suggestions.style.display = 'none';
+                        });
+                        suggestions.appendChild(div);
+                    });
+                    suggestions.style.display = 'block';
+                } else {
+                    suggestions.style.display = 'none';
+                }
+            });
+            
+            // Keyboard navigation
+            input.addEventListener('keydown', function(e) {
+                const items = suggestions.querySelectorAll('.suggestion-item');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex + 1) % items.length;
+                    updateSelection(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
+                    updateSelection(items);
+                } else if (e.key === 'Enter' && selectedIndex >= 0) {
+                    e.preventDefault();
+                    items[selectedIndex].click();
+                }
+            });
+            
+            function updateSelection(items) {
+                items.forEach(item => item.classList.remove('selected'));
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    items[selectedIndex].classList.add('selected');
+                }
+            }
+            
+            // Hide suggestions ketika klik di luar
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+                    suggestions.style.display = 'none';
+                }
+            });
+        }
+
+        // Form validation
+        document.getElementById('predictionForm').addEventListener('submit', function(e) {
+            const tim1 = document.getElementById('tim1').value.trim();
+            const tim2 = document.getElementById('tim2').value.trim();
+            
+            if (!tim1 || !tim2) {
+                e.preventDefault();
+                alert('Mohon isi kedua nama klub!');
+                return;
+            }
+            
+            if (tim1.toLowerCase() === tim2.toLowerCase()) {
+                e.preventDefault();
+                alert('Nama klub tidak boleh sama!');
+                return;
+            }
+        });
+
+        // Animasi progress bars
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 100);
+            });
+        });
+
+        // Auto-complete examples
+        const teamExamples = allTeams.length > 0 ? [
+            allTeams[Math.floor(Math.random() * allTeams.length)],
+            allTeams[Math.floor(Math.random() * allTeams.length)],
+            allTeams[Math.floor(Math.random() * allTeams.length)]
+        ] : ['Manchester City', 'Liverpool', 'Arsenal'];
+        
+        let exampleIndex = 0;
+        
+        function cycleExamples() {
+            const tim1 = document.getElementById('tim1');
+            const tim2 = document.getElementById('tim2');
+            
+            if (tim1 && tim2 && !tim1.value && !tim2.value) {
+                tim1.placeholder = `Contoh: ${teamExamples[exampleIndex]}`;
+                tim2.placeholder = `Contoh: ${teamExamples[(exampleIndex + 1) % teamExamples.length]}`;
+                
+                exampleIndex = (exampleIndex + 1) % teamExamples.length;
+            }
+        }
+        
+        // Ganti contoh setiap 3 detik hanya jika input kosong
+        setInterval(cycleExamples, 3000);
+        cycleExamples();
+    </script>
+</body>
+</html>
