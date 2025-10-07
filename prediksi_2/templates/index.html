@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediksi Pertandingan Sepak Bola</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-futbol"></i> Prediksi Pertandingan Sepak Bola</h1>
+            <p>Pilih tim tuan rumah dan tim tamu untuk mendapatkan prediksi hasil pertandingan</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="team-selection">
+                <div class="team-box">
+                    <h3><i class="fas fa-home"></i> Tim Tuan Rumah (Home)</h3>
+                    <div class="search-box">
+                        <input type="text" id="home-search" placeholder="Cari tim tuan rumah...">
+                    </div>
+                    <div class="team-list" id="home-team-list">
+                        {% for team in teams %}
+                        <div class="team-item" data-team="{{ team }}">{{ team }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="team-box">
+                    <h3><i class="fas fa-plane"></i> Tim Tamu (Away)</h3>
+                    <div class="search-box">
+                        <input type="text" id="away-search" placeholder="Cari tim tamu...">
+                    </div>
+                    <div class="team-list" id="away-team-list">
+                        {% for team in teams %}
+                        <div class="team-item" data-team="{{ team }}">{{ team }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vs-container">
+                <div class="vs-circle">VS</div>
+            </div>
+            
+            <div class="selected-teams">
+                <div class="selected-team">
+                    <h3>Tim Tuan Rumah</h3>
+                    <p id="selected-home-team">- Pilih Tim -</p>
+                </div>
+                
+                <div class="selected-team">
+                    <h3>Tim Tamu</h3>
+                    <p id="selected-away-team">- Pilih Tim -</p>
+                </div>
+            </div>
+            
+            <button class="prediction-btn" id="predict-btn" disabled>
+                <i class="fas fa-chart-line"></i> PREDIKSI PERTANDINGAN
+            </button>
+            
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Memprediksi pertandingan...</p>
+            </div>
+            
+            <div class="result-container" id="result-container" style="display: none;">
+                <div class="result-header">
+                    <h2><i class="fas fa-trophy"></i> Hasil Prediksi</h2>
+                </div>
+                
+                <div class="result-content">
+                    <div class="score-prediction">
+                        <h3>Prediksi Skor</h3>
+                        <div class="score" id="predicted-score">2 - 1</div>
+                    </div>
+                    
+                    <div class="result-prediction" id="result-text">
+                        Manchester United diprediksi MENANG 2-1
+                    </div>
+                    
+                    <div class="probability-chart">
+                        <div class="probability-item home-win">
+                            <h4>HOME WIN</h4>
+                            <div class="probability-value" id="home-prob">65%</div>
+                            <p>Peluang kemenangan tuan rumah</p>
+                        </div>
+                        
+                        <div class="probability-item draw">
+                            <h4>DRAW</h4>
+                            <div class="probability-value" id="draw-prob">20%</div>
+                            <p>Peluang hasil seri</p>
+                        </div>
+                        
+                        <div class="probability-item away-win">
+                            <h4>AWAY WIN</h4>
+                            <div class="probability-value" id="away-prob">15%</div>
+                            <p>Peluang kemenangan tamu</p>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-container">
+                        <div class="stats-box">
+                            <h3><i class="fas fa-chart-bar"></i> Statistik Tim Tuan Rumah</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <p><i class="fas fa-futbol"></i> Gol HT</p>
+                                    <div class="stat-value" id="ht-goals-home">0.8</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-bullseye"></i> Shots</p>
+                                    <div class="stat-value" id="shots-home">12.5</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-crosshairs"></i> Shots on Target</p>
+                                    <div class="stat-value" id="sot-home">4.5</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-exclamation-triangle"></i> Fouls</p>
+                                    <div class="stat-value" id="fouls-home">11.2</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-flag"></i> Corners</p>
+                                    <div class="stat-value" id="corners-home">5.2</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-box">
+                            <h3><i class="fas fa-chart-bar"></i> Statistik Tim Tamu</h3>
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <p><i class="fas fa-futbol"></i> Gol HT</p>
+                                    <div class="stat-value" id="ht-goals-away">0.5</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-bullseye"></i> Shots</p>
+                                    <div class="stat-value" id="shots-away">10.5</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-crosshairs"></i> Shots on Target</p>
+                                    <div class="stat-value" id="sot-away">3.8</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-exclamation-triangle"></i> Fouls</p>
+                                    <div class="stat-value" id="fouls-away">11.8</div>
+                                </div>
+                                <div class="stat-item">
+                                    <p><i class="fas fa-flag"></i> Corners</p>
+                                    <div class="stat-value" id="corners-away">4.8</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="insights-container">
+                        <h3><i class="fas fa-lightbulb"></i> Insight Pertandingan</h3>
+                        <div class="insights-grid">
+                            <div class="insight-card" id="scoring-insight">
+                                <div class="insight-icon" id="scoring-icon">⚡</div>
+                                <h4>Tipe Pertandingan</h4>
+                                <p id="scoring-text">Pertandingan diprediksi HIGH-SCORING dengan 5 gol</p>
+                            </div>
+                            
+                            <div class="insight-card" id="match-insight">
+                                <div class="insight-icon" id="match-icon">💥</div>
+                                <h4>Dinamika Pertandingan</h4>
+                                <p id="match-text">Diprediksi KEMENANGAN BESAR dengan selisih 3 gol</p>
+                            </div>
+                            
+                            <div class="insight-card" id="confidence-insight">
+                                <div class="insight-icon" id="confidence-icon">🎯</div>
+                                <h4>Kualitas Prediksi</h4>
+                                <p id="confidence-text">Prediksi sangat kuat berdasarkan data historis</p>
+                            </div>
+                            
+                            <div class="insight-card" id="pattern-insight">
+                                <div class="insight-icon" id="pattern-icon">🔥</div>
+                                <h4>Pola Gol</h4>
+                                <p id="pattern-text">Salah satu tim menunjukkan kekuatan serangan tinggi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="error-container" id="error-container" style="display: none;">
+                <div class="error-message">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h3>Terjadi Kesalahan</h3>
+                    <p id="error-text">Gagal memuat prediksi. Silakan coba lagi.</p>
+                    <button class="retry-btn" id="retry-btn">Coba Lagi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elemen DOM
+        const homeSearch = document.getElementById('home-search');
+        const awaySearch = document.getElementById('away-search');
+        const homeTeamList = document.getElementById('home-team-list');
+        const awayTeamList = document.getElementById('away-team-list');
+        const selectedHomeTeam = document.getElementById('selected-home-team');
+        const selectedAwayTeam = document.getElementById('selected-away-team');
+        const predictBtn = document.getElementById('predict-btn');
+        const resultContainer = document.getElementById('result-container');
+        const loading = document.getElementById('loading');
+        const errorContainer = document.getElementById('error-container');
+        const errorText = document.getElementById('error-text');
+        const retryBtn = document.getElementById('retry-btn');
+
+        // Variabel untuk menyimpan tim yang dipilih
+        let selectedHome = null;
+        let selectedAway = null;
+
+        // Fungsi untuk memilih tim
+        function selectTeam(type, team, element) {
+            // Hapus seleksi sebelumnya
+            const items = type === 'home' 
+                ? homeTeamList.querySelectorAll('.team-item') 
+                : awayTeamList.querySelectorAll('.team-item');
+            
+            items.forEach(item => item.classList.remove('selected'));
+            
+            // Tambahkan seleksi ke item yang diklik
+            element.classList.add('selected');
+            
+            // Simpan pilihan
+            if (type === 'home') {
+                selectedHome = team;
+                selectedHomeTeam.textContent = team;
+            } else {
+                selectedAway = team;
+                selectedAwayTeam.textContent = team;
+            }
+            
+            // Aktifkan tombol prediksi jika kedua tim sudah dipilih
+            predictBtn.disabled = !(selectedHome && selectedAway);
+        }
+
+        // Fungsi untuk mencari tim
+        function setupSearch() {
+            homeSearch.addEventListener('input', function() {
+                filterTeams(homeTeamList, this.value);
+            });
+            
+            awaySearch.addEventListener('input', function() {
+                filterTeams(awayTeamList, this.value);
+            });
+        }
+
+        // Fungsi untuk memfilter daftar tim berdasarkan pencarian
+        function filterTeams(teamList, searchTerm) {
+            const items = teamList.querySelectorAll('.team-item');
+            const term = searchTerm.toLowerCase();
+            
+            items.forEach(item => {
+                const teamName = item.textContent.toLowerCase();
+                if (teamName.includes(term)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Fungsi untuk mendapatkan prediksi dari server
+        async function getPrediction() {
+            if (!selectedHome || !selectedAway) return;
+            
+            // Tampilkan loading, sembunyikan hasil dan error
+            loading.style.display = 'block';
+            resultContainer.style.display = 'none';
+            errorContainer.style.display = 'none';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        home_team: selectedHome,
+                        away_team: selectedAway
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update UI dengan hasil prediksi
+                    displayPrediction(data.prediction);
+                } else {
+                    throw new Error(data.error || 'Terjadi kesalahan pada server');
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Fungsi untuk menampilkan hasil prediksi
+        function displayPrediction(prediction) {
+            document.getElementById('predicted-score').textContent = prediction.score;
+            document.getElementById('result-text').textContent = prediction.result;
+            document.getElementById('home-prob').textContent = `${prediction.probabilities.H}%`;
+            document.getElementById('draw-prob').textContent = `${prediction.probabilities.D}%`;
+            document.getElementById('away-prob').textContent = `${prediction.probabilities.A}%`;
+            
+            // Update statistik tim tuan rumah
+            document.getElementById('ht-goals-home').textContent = prediction.stats_used.home.ht_goals;
+            document.getElementById('shots-home').textContent = prediction.stats_used.home.shots;
+            document.getElementById('sot-home').textContent = prediction.stats_used.home.shots_on_target;
+            document.getElementById('fouls-home').textContent = prediction.stats_used.home.fouls;
+            document.getElementById('corners-home').textContent = prediction.stats_used.home.corners;
+            
+            // Update statistik tim tamu
+            document.getElementById('ht-goals-away').textContent = prediction.stats_used.away.ht_goals;
+            document.getElementById('shots-away').textContent = prediction.stats_used.away.shots;
+            document.getElementById('sot-away').textContent = prediction.stats_used.away.shots_on_target;
+            document.getElementById('fouls-away').textContent = prediction.stats_used.away.fouls;
+            document.getElementById('corners-away').textContent = prediction.stats_used.away.corners;
+            
+            // Update insights
+            document.getElementById('scoring-icon').textContent = prediction.insights.scoring.icon;
+            document.getElementById('scoring-text').textContent = prediction.insights.scoring.description;
+            
+            document.getElementById('match-icon').textContent = prediction.insights.match_type.icon;
+            document.getElementById('match-text').textContent = prediction.insights.match_type.description;
+            
+            document.getElementById('confidence-icon').textContent = prediction.insights.confidence.icon;
+            document.getElementById('confidence-text').textContent = prediction.insights.confidence.insight;
+            
+            document.getElementById('pattern-icon').textContent = prediction.insights.goal_pattern.icon;
+            document.getElementById('pattern-text').textContent = prediction.insights.goal_pattern.insight;
+            
+            // Tampilkan hasil prediksi
+            resultContainer.style.display = 'block';
+            
+            // Scroll ke hasil prediksi
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            errorText.textContent = message;
+            errorContainer.style.display = 'block';
+        }
+
+        // Inisialisasi aplikasi
+        function initApp() {
+            setupSearch();
+            
+            // Setup event listener untuk item tim
+            document.querySelectorAll('.team-item').forEach(item => {
+                const team = item.getAttribute('data-team');
+                
+                // Untuk home team
+                if (item.parentElement.id === 'home-team-list') {
+                    item.addEventListener('click', () => {
+                        selectTeam('home', team, item);
+                    });
+                }
+                
+                // Untuk away team
+                if (item.parentElement.id === 'away-team-list') {
+                    item.addEventListener('click', () => {
+                        selectTeam('away', team, item);
+                    });
+                }
+            });
+            
+            // Setup tombol prediksi
+            predictBtn.addEventListener('click', getPrediction);
+            
+            // Setup tombol retry
+            retryBtn.addEventListener('click', getPrediction);
+        }
+
+        // Jalankan aplikasi saat halaman dimuat
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
